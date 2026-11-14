@@ -1,6 +1,7 @@
-/* Global styles. Colours are tokens in :root. Fonts come from next/font (see app/layout.js).
+/* Global styles. Colours are tokens in :root. Fonts are self-hosted (app/fonts.css + public/fonts).
    Sizes use --k = 1% of the stage width (capped by height), so every scene fits any phone. */
 :root{
+  --f-script:'Great Vibes'; --f-caps:'Cinzel'; --f-body:'Cormorant Garamond'; --f-hi:'Tiro Devanagari Hindi';
   --plum:#33184f; --plum-2:#5b3b94; --gold:#d9ae52; --gold-hi:#f6dc94; --cream:#fbf1de; --night-ink:#f3eaff;
   --ambient:#efe6fb; --ambient-ink:#3a2160; --stage-shadow:rgba(58,33,96,.28);
 }
