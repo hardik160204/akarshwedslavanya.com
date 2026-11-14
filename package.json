@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "preview": "npx serve out",
-    "record": "node scripts/record.mjs"
+    "record": "node scripts/record.mjs",
+    "check": "node scripts/check-timeline.mjs"
   },
   "dependencies": {
+    "@theatre/core": "^0.7.2",
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
