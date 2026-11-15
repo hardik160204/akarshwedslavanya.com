@@ -1,61 +1,57 @@
-/* Self-check: the hand-written choreography loads into Theatre.js and interpolates as intended,
-   the thread's shapes are evenly resampled, and calendar times convert correctly. Run: npm run check */
+/* Self-check: the choreography loads into Theatre.js and interpolates as intended, every animated object
+   has an element on the page, and calendar times convert correctly. Run: npm run check */
 import assert from 'node:assert/strict';
 import core from '@theatre/core';
-import { SHEETS, SCENES, CUES, HOLD_BARS, buildState } from '../lib/timeline.js';
-import { SHAPES, SCENE_SHAPES, resample, N } from '../lib/thread.js';
+import { SHEETS, SCENES, CUES, HOLD_BARS, LAYERS, buildState } from '../lib/timeline.js';
+import { SCENE_ART } from '../lib/art.js';
+import { sceneHtml } from '../lib/scenes.js';
+import { SECTIONS } from '../lib/score.js';
 import { ics } from '../lib/engine.js';
 import { CONFIG } from '../lib/config.js';
 
-const { getProject, types } = core;
+const { getProject } = core;
 const project = getProject('check', { state: buildState() });
 await project.ready;
-
 const objOf = (sid, ok) => {
-  const props = {};
-  for (const [p, kfs] of Object.entries(SHEETS[sid][ok])) props[p] = typeof kfs[0][1] === 'string' ? types.rgba() : 0;
+  const props = {}; for (const p in SHEETS[sid][ok]) props[p] = 0;
   return project.sheet(sid).object(ok, props);
 };
 const near = (a, b, msg, eps = 1e-3) => assert.ok(Math.abs(a - b) < eps, `${msg}: ${a} != ${b}`);
 
-/* world: scenes cross-fade, the camera pushes in between them, colours follow */
-const world = project.sheet('world');
-const s0 = objOf('world', 's0'), s1 = objOf('world', 's1'), cam = objOf('world', 'cam'), g1 = objOf('world', 'g1');
-world.sequence.position = 0; near(s0.value.o, 1, 'cover visible at 0'); near(s1.value.o, 0, 'story hidden at 0'); near(cam.value.z, 1, 'camera at rest');
-world.sequence.position = 1; near(s0.value.o, 0, 'cover hidden at 1'); near(s1.value.o, 1, 'story visible at 1');
-near(g1.value.c.r, 0x3a / 255, 'glow colour at story');
-world.sequence.position = .5;
-assert.ok(s0.value.o < .2 && s1.value.o < .2, 'both scenes dim mid-transition');
-assert.ok(cam.value.z > 1.05, 'camera pushes in through the hand-over');
+/* pages slide and cross-fade on the world clock */
+const world = project.sheet('world'), s0 = objOf('world', 's0'), s1 = objOf('world', 's1');
+world.sequence.position = 0; near(s0.value.o, 1, 'cover visible'); near(s1.value.o, 0, 'next page hidden');
+world.sequence.position = 1; near(s0.value.o, 0, 'cover gone'); near(s1.value.o, 1, 'page 2 visible');
+world.sequence.position = .5; assert.ok(s0.value.x < 0 && s1.value.x > 0, 'pages slide past each other');
 
-/* intro: the thread slams in from deep space */
-const intro = project.sheet('intro'), th = objOf('intro', 'th');
-intro.sequence.position = 0; near(th.value.s, .02, 'thread far away before the tap');
-intro.sequence.position = .35; near(th.value.s, 1.16, 'slam overshoot on the downbeat');
-intro.sequence.position = .85; near(th.value.s, 1, 'thread settles');
+/* the doors swing inward, in opposite directions */
+const intro = project.sheet('intro'), dl = objOf('intro', 'dl'), dr = objOf('intro', 'dr');
+intro.sequence.position = 0; near(dl.value.ry, 0, 'doors closed');
+intro.sequence.position = 1.25; near(dl.value.ry, 106, 'left door open'); near(dr.value.ry, -106, 'right door open');
 
-/* every scene has a sheet, a light pulse, cues and an autoplay hold */
+/* paper layers pop up from below with a little overshoot */
+const l0 = objOf('cover', 'l0'), cover = project.sheet('cover');
+cover.sequence.position = .9; near(l0.value.y, 26, 'layer starts below');
+cover.sequence.position = 3; near(l0.value.y, 0, 'layer stands up');
+
+/* every page has art, a sheet, cues, music and a hold; every animated object has an element */
 assert.equal(HOLD_BARS.length, SCENES.length);
-assert.equal(SCENE_SHAPES.length, SCENES.length);
-for (const id of SCENES) { assert.ok(SHEETS[id] && SHEETS[id].th, `scene ${id} has a sheet with a pulse`); assert.ok(CUES[id], `cues for ${id}`); }
-const n1 = objOf('cover', 'n1'), cover = project.sheet('cover');
-cover.sequence.position = 0; near(n1.value.w, 0, 'name hidden before entrance');
-cover.sequence.position = 5; near(n1.value.w, 1, 'name revealed after entrance');
-
-/* thread: every shape has N evenly spaced points (so morphs and pulses move at a steady speed) */
-for (const [name, s] of Object.entries(SHAPES)) {
-  assert.equal(s.pts.length, N * 2, `${name} has ${N} points`);
-  const seg = i => Math.hypot(s.pts[i * 2 + 2] - s.pts[i * 2], s.pts[i * 2 + 3] - s.pts[i * 2 + 1]);
-  const a = seg(0), b = seg(Math.floor(N / 2)), c = seg(N - 2);
-  assert.ok(Math.abs(a - b) / b < .15 && Math.abs(c - b) / b < .15, `${name} is evenly spaced (${a.toFixed(3)} ${b.toFixed(3)} ${c.toFixed(3)})`);
+const html = sceneHtml(CONFIG), onPage = new Set([...html.matchAll(/data-t="([^"]+)"/g)].map(m => m[1]));
+for (const id of SCENES) {
+  assert.ok(SHEETS[id] && CUES[id] && SECTIONS[id], `page ${id} has a sheet, cues and music`);
+  const layers = SCENE_ART[id]();
+  assert.ok(layers.length >= 4 && layers.length <= LAYERS, `${id} has 4–${LAYERS} paper layers`);
 }
-const line = resample([[0, 0], [10, 0]], 11);
-near(line[2], 1, 'resample a straight line'); near(line[20], 10, 'resample keeps the end');
+for (const [sid, objs] of Object.entries(SHEETS)) for (const ok of Object.keys(objs)) {
+  if (sid === 'world' && ok === 'fx') continue;                      // drives the petals, not an element
+  if (/^l\d$/.test(ok) && +ok[1] >= SCENE_ART[sid]().length) continue; // fewer layers on this page
+  assert.ok(onPage.has(`${sid}.${ok}`), `element for ${sid}.${ok}`);
+}
 
 /* calendar: India time → UTC */
 const cal = ics(CONFIG, CONFIG.events[0]);
 assert.ok(cal.includes('DTSTART:20261209T053000Z'), '11 AM IST is 05:30 UTC');
 assert.ok(cal.includes('LOCATION:Green View Resort\\, Agra Road\\, Aligarh'), 'commas escaped in .ics');
 
-console.log('timeline ok:', Object.keys(SHEETS).length, 'sheets ·', Object.keys(SHAPES).length, 'thread shapes · calendar ok');
+console.log('storybook ok:', SCENES.length, 'pages ·', onPage.size, 'animated elements · calendar ok');
 process.exit(0);

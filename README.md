@@ -1,23 +1,20 @@
-# Akarsh & Lavanya — "One Thread" (Next.js + Theatre.js + Web Audio)
+# Akarsh & Lavanya — an illustrated wedding storybook (Next.js + Theatre.js + Web Audio)
 
-A cinematic, mobile-first wedding invitation that plays like a short film with its own music.
+A mobile-first wedding invitation told like a picture book, tapped through like Instagram stories.
 
-**The idea: one thread of light does every job.** It slams in from deep space on the first beat and ties a
-heart-knot between the two names, becomes a heart-shaped constellation, blooms into the Haldi marigold, loops
-into two locked rings, turns into the live sound wave of the Sangeet, circles the sacred fire seven times for the
-pheras (a bell and a diya for every round), draws the road to the venue, and ties the knot again at the end.
-Every scene hands the same line to the next, drawn by one function (`drawThread` in `lib/thread.js`).
+**The story:** a guest taps and the palace doors swing open. Then: the cover (the couple under a marigold
+arch before a pink palace) → *Once upon a time*, two havelis under the same moon → *Two families, one yes*,
+two decorated elephants meeting under a paper heart → **The Radiance Rituals** (Haldi in lavender fields) →
+**Ring Ceremony & Sparkling Sangeet Night** (a stage, golden rings, dhols, the couple dancing) →
+**Mangal Vivah** (the mandap and the sacred fire) → the venue (a car driving up to Green View Resort) →
+the finale with a countdown, petals, share and RSVP.
 
-**The look:** a near-black stage with a warm glow that breathes and changes colour per chapter, film grain,
-a vignette, bokeh, a camera that never stops drifting and pushes in through every hand-over.
+**The look:** paper-cut illustrations drawn entirely in code (`lib/art.js`), no image files. Every picture is a
+stack of paper layers with soft shadows that pop up like a pop-up book when its page arrives.
 
-**The sound:** an original score composed in code (`lib/score.js`), 100 BPM in F major: santoor plucks, tanpura
-drone, a shehnai melody, dholak, claps, ghungroo and temple bells. Each chapter has its own section, changes land
-on the downbeat, and every move has a sound (the slam, whooshes, the rings' clink, the fire, the pin drop).
-Music starts when the guest taps the light (phones only allow sound after a tap); the ♪ button mutes it.
-
-Guests tap once and the story plays by itself, scene by scene on the beat. They can swipe up/down any time,
-pause with the ❚❚ button, and it ends on the card with the countdown, share and RSVP.
+**How guests use it:** tap right for the next page, left to go back, hold to pause, or swipe. Pages also move on
+by themselves, with progress bars at the top. An original score composed in code (`lib/score.js`: santoor,
+tanpura, shehnai, dholak, temple bells) plays after the doors open; ♪ mutes it.
 
 ## 1. Run it
 
@@ -25,26 +22,25 @@ You need Node.js 18.18 or newer.
 
     npm install
     npm run dev          # http://localhost:3000
-    npm run check        # self-check: timeline, thread shapes, calendar times
+    npm run check        # self-check: timeline, every animated element exists, calendar times
 
 ## 2. Edit your details
 
-Open `lib/config.js`: names, story lines, the three events, calendar times, venue, countdown moment,
-WhatsApp RSVP number (the RSVP button stays hidden until you add one), and `music.src` if you want your
-own licensed song instead of the original score (put the file in `public/`).
+Open `lib/config.js`: names, the two story pages, the three events, calendar times, venue, countdown moment,
+WhatsApp RSVP number (the RSVP button stays hidden until you add one), and `music.src` if you want your own
+licensed song instead of the original score (put the file in `public/`).
 
-**Personal invites:** add `?to=` to the link, e.g. `…/?to=Sharma%20Family`. The invitation opens with
-"Dear Sharma Family," and ends with "We can't wait to celebrate with you, Sharma Family."
+**Personal invites:** add `?to=` to the link, e.g. `…/?to=Sharma%20Family`. The doors greet them with
+"Dear Sharma Family," and the last page says "We can't wait to celebrate with you, Sharma Family."
 
 ## 3. How it's built
 
-    lib/timeline.js   Theatre.js choreography: the "world" sheet (scrubbed by swiping: glow colours, camera push,
-                      scene layers, particles), the slam intro, every scene's entrance and light pulse, sound cues
-    lib/thread.js     the thread's shapes, the morph between scenes, the one drawing function, particles
-    lib/score.js      the music and sound effects, synthesized with Web Audio (no samples, no recordings)
-    lib/scenes.js     the HTML of the gate, every scene (art layer + text layer) and the HUD
-    lib/engine.js     direction: Theatre playback, camera, autoplay on the beat, swipe, countdown, share, calendar
-    app/globals.css   all styling (sizes in --k units so every phone fits)
+    lib/art.js        the paper-cut illustrations: palace, havelis, elephants, the couple, mandap, fire, map…
+    lib/timeline.js   Theatre.js choreography: page turns, the doors, each page's pop-up and its little moments
+    lib/scenes.js     the HTML of the doors, every page and the story header
+    lib/engine.js     tap/hold/swipe navigation, Theatre playback, music, petals and confetti, countdown, share
+    lib/score.js      the music and sound effects, synthesized with Web Audio
+    app/globals.css   all styling (sizes in --k units so every phone fits; short screens get smaller pictures)
     app/fonts.css     self-hosted fonts (public/fonts), so builds never depend on Google Fonts
 
 To retime anything, change the numbers in `lib/timeline.js`: `[time, value, ease]`.
@@ -57,7 +53,7 @@ anywhere. Put your live link in `siteUrl` in `lib/config.js` so WhatsApp shows t
 
 ## 5. Make the MP4
 
-`?film=1` plays the whole story full-screen with no buttons (about a minute). Screen-record it with sound on
+`?film=1` plays the whole story full-screen with no buttons (about 75 seconds). Screen-record it with sound on
 your phone, or record it automatically (video only; add music in an editor or via `public/song.mp3`):
 
     npx playwright install chromium     # one time
