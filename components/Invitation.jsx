@@ -10,16 +10,6 @@ export default function Invitation() {
 
   useEffect(() => initInvitation(ref.current, CONFIG), []);
 
-  const [a, b] = CONFIG.names;
-  return (
-    <div className="app" ref={ref}>
-      <div className="ambient" aria-hidden="true" />
-      <div className="amb l hi" aria-hidden="true">{a.hi || a.en}</div>
-      <div className="amb r hi" aria-hidden="true">{b.hi || b.en}</div>
-      <div className="phone">
-        {/* The storybook: pages are plain HTML built from lib/config.js, delivered pre-rendered. */}
-        <main className="stage" id="stage" data-tone="day" aria-label="Wedding invitation" dangerouslySetInnerHTML={{ __html: html }} />
-      </div>
-    </div>
-  );
+  /* The whole invitation is plain HTML built from lib/config.js, delivered pre-rendered. */
+  return <div className="app" ref={ref} dangerouslySetInnerHTML={{ __html: html }} />;
 }
