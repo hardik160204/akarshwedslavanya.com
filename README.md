@@ -17,8 +17,8 @@ no image files.
 8. **Our hashtag** (tap to copy), then a lotus pond with an elephant, and Share.
 
 Sections animate in (Theatre.js) as they scroll into view; blue peacock mandalas at the edges turn as you
-scroll. The wedding song (`public/song.mp3`, see `music` in `lib/config.js`) plays when the doors open; until that
-file exists, the original score (`lib/score.js`) plays instead. ♪ mutes it.
+scroll. The wedding song (`public/song.mp3`: Ek Dafaa, from 0:36, see `music` in `lib/config.js`) plays when the doors open; if that
+file is missing, the original score (`lib/score.js`) plays instead. ♪ mutes it.
 
 ## 1. Run it
 
